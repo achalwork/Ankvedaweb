@@ -9,10 +9,13 @@ const font=readFileSync(path.join(dir,'fonts/NotoSansDevanagari.ttf')).toString(
 const fontFace=`@font-face{font-family:NS;src:url(data:font/ttf;base64,${font});font-weight:100 900}`;
 
 export async function buildReport({name,d,m,y,tob='',pob=''},lang='mr'){
-  const ctx=await buildContext({name,d,m,y,tob,pob});   // numbers + kundali (place lookup happens here)
+  let ctx;
+  try{ctx=await buildContext({name,d,m,y,tob,pob})}   // numbers + kundali (place lookup happens here)
+  catch(e){console.error('context failed, using numbers only:',e);ctx=await buildContext({name,d,m,y,tob:'',pob:''})}
   const {r,sug}=ctx;
   const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_PATH||undefined,args:['--no-sandbox','--disable-setuid-sandbox']});
-  try{const pg=await browser.newPage();await pg.setContent(reportHtml(r,sug,lang==='en'?'en':'mr',fontFace,ctx),{waitUntil:'load'});
+  try{const pg=await browser.newPage();let html;try{html=reportHtml(r,sug,lang==='en'?'en':'mr',fontFace,ctx)}catch(e){console.error('report html failed, using basic report:',e);html=reportHtml(r,sug,lang==='en'?'en':'mr',fontFace)}
+    await pg.setContent(html,{waitUntil:'load'});
     await pg.evaluate(()=>document.fonts.ready);
     return Buffer.from(await pg.pdf({format:'A4',printBackground:true,preferCSSPageSize:true}));
   }finally{await browser.close()}
