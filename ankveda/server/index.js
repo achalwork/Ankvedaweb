@@ -37,8 +37,9 @@ const clean=b=>{const name=String(b.name||'').trim().slice(0,60),d=+b.d,m=+b.m,y
   const dt=new Date(y,m-1,d);if(!/^[A-Za-z][A-Za-z\s.'-]*$/.test(name)||dt.getDate()!==d||dt.getMonth()!==m-1||y<1900||dt>new Date())return null;
   const wa=/^[6-9]\d{9}$/.test(b.wa||'')?b.wa:'';
   const tob=/^([01]\d|2[0-3]):[0-5]\d$/.test(b.tob||'')?b.tob:'';           // 24h "HH:MM" or '' (unknown)
-  const pobRaw=String(b.pob||'').trim().slice(0,60);const pob=/^[\p{L}\s.,'()-]{2,60}$/u.test(pobRaw)?pobRaw:'';
-  return {name,d,m,y,wa,tob,pob}};
+  const pobRaw=String(b.pob||'').trim().slice(0,120);const pob=/^[\p{L}\p{N}\s.,'()-]{2,120}$/u.test(pobRaw)?pobRaw:'';
+  const la=+b.plat,lo=+b.plon,okc=b.plat!==''&&b.plat!=null&&b.plon!==''&&b.plon!=null&&la>=6&&la<=38&&lo>=68&&lo<=98.6; // picked-place coordinates (India only)
+  return {name,d,m,y,wa,tob,pob,...(pob&&okc?{plat:la,plon:lo}:{})}};
 
 app.post('/api/order',async(req,res)=>{
   const f=clean(req.body||{});if(!f||analyze(f).error)return res.status(400).json({error:'invalid'});

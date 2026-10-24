@@ -11,7 +11,7 @@ export async function buildContext(form){
   const sug=suggest(form.name,r.mulank,r.bhagyank,5);
   let k=null,place=null;
   if(form.pob){
-    place=await resolvePlace(form.pob);
+    place=(Number.isFinite(+form.plat)&&Number.isFinite(+form.plon)&&form.plat!==''&&form.plon!=='')?{lat:+form.plat,lon:+form.plon,label:form.pob,source:'picked'}:await resolvePlace(form.pob);
     if(place){const t=parseTob(form.tob);
       try{k=kundali({y:form.y,m:form.m,d:form.d,hh:t?t.hh:null,mm:t?t.mm:0,lat:place.lat,lon:place.lon})}catch(e){console.error('kundali failed',e);k=null}}
   }

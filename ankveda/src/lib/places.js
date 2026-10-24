@@ -122,3 +122,22 @@ export async function resolvePlace(text){
   }catch{}
   return null;
 }
+
+const INDIA_BBOX='68.0,6.0,98.5,37.6'; // lon_min,lat_min,lon_max,lat_max
+/** Live autocomplete for any town / village in India. Returns [{label,lat,lon}] (built-in cities first, then OpenStreetMap via Photon). */
+export async function searchPlaces(q,signal){
+  const t=String(q||'').trim();if(t.length<2)return[];
+  const k=key(t);
+  const local=P.filter(p=>key(p.name).startsWith(k)).slice(0,4).map(p=>({label:placeLabel(p),lat:p.lat,lon:p.lon}));
+  let remote=[];
+  try{
+    const r=await fetch('https://photon.komoot.io/api/?limit=8&lang=en&bbox='+INDIA_BBOX+'&q='+encodeURIComponent(t),{signal});
+    if(r.ok){const j=await r.json();
+      remote=(j.features||[]).filter(f=>f.properties?.countrycode==='IN'||!f.properties?.countrycode).map(f=>{const x=f.properties||{};
+        const parts=[x.name,x.district||x.county,x.state].filter(Boolean);
+        return{label:[...new Set(parts)].join(', '),lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0]}});}
+  }catch(e){if(e?.name==='AbortError')throw e}
+  const seen=new Set(),out=[];
+  for(const x of [...local,...remote]){const id=x.label.toLowerCase();if(!seen.has(id)){seen.add(id);out.push(x)}}
+  return out.slice(0,10);
+}

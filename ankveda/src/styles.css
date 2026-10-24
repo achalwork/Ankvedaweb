@@ -158,3 +158,8 @@ html{overflow-y:scroll;scrollbar-gutter:stable}
 .form .chk input{width:18px;height:18px;margin:0;accent-color:#c2410c;flex:none}
 .form fieldset small{display:block;margin-top:6px}
 .dob.tob{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+.form .place{position:relative}
+.plist{position:absolute;left:0;right:0;top:calc(100% - 22px);z-index:20;margin:0;padding:4px;list-style:none;background:#fff;border:1px solid #f0d9bf;border-radius:12px;box-shadow:0 10px 24px rgba(120,53,15,.18);max-height:260px;overflow:auto}
+.plist li{padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:500;font-size:.95rem}
+.plist li:hover{background:#fff1e3}
