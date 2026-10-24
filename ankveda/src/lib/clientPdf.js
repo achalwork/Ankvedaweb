@@ -1,7 +1,6 @@
 // Browser-side PDF (used for the demo preview, and as a fallback if the server cannot make the PDF).
 // Renders the same report HTML in a hidden iframe, then slices it into A4 pages with html2canvas + jsPDF.
-import {analyze} from './analyze.js';
-import {suggest} from './variants.js';
+import {buildContext} from './context.js';
 import {reportHtml} from './reportHtml.js';
 const CDN='https://cdnjs.cloudflare.com/ajax/libs/';
 const load=(src,test)=>new Promise((ok,no)=>{if(test())return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
@@ -9,9 +8,8 @@ const FONTS='<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400
 
 export async function makePdfBlob(form,lang){
   await Promise.all([load(CDN+'html2canvas/1.4.1/html2canvas.min.js',()=>window.html2canvas),load(CDN+'jspdf/2.5.1/jspdf.umd.min.js',()=>window.jspdf)]);
-  const r=analyze(form);if(r.error)throw new Error('bad input');
-  const sug=suggest(form.name,r.mulank,r.bhagyank,5);
-  let html=reportHtml(r,sug,lang==='en'?'en':'mr');
+  const ctx=await buildContext(form);const {r,sug}=ctx;
+  let html=reportHtml(r,sug,lang==='en'?'en':'mr','',ctx);
   html=html.replace('</head>',FONTS+'<style>@page{margin:0}body{width:688px;margin:0;padding:0}.cover{margin-bottom:10mm}</style></head>');
   const fr=document.createElement('iframe');
   fr.style.cssText='position:fixed;left:-10000px;top:0;width:688px;height:1200px;border:0';
