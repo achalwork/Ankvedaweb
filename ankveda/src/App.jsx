@@ -422,14 +422,22 @@ function Result({t,r,buy,busy,perr,again}){
   return <>
   <section><div className="w narrow"><button className="link" onClick={again}>{t.again}</button>
     <div className={'card verdict '+(aligned?'ok':'warn')}><small>{t.resFor(r.name)}</small><h1>{aligned?t.yes:t.no}</h1><p>{aligned?t.yesT:t.noT}</p><p className="mu">{t.note}</p></div>
-    {!aligned&&<div className="card dosh"><h2>{t.dnH}</h2><p>{t.dnT(cnt)}</p>
+    {/* {!aligned&&<div className="card dosh"><h2>{t.dnH}</h2><p>{t.dnT(cnt)}</p>
       {cnt>0&&<div className="blur" aria-hidden="true"><i/><i/><i/><span>{t.dnLock}</span></div>}
       <button className="btn big" disabled={busy} onClick={buy}>{busy?t.payBusy:cta}</button>
       {perr&&<p className="err" role="alert">{t.payErr}</p>}<p className="mu small">{t.dnNote}</p></div>}
     <div className="card"><h2>{t.yn}</h2><div className="nums">
       {[[t.nn,n],[t.mu,m],[t.bh,b]].map(([l,v],i)=><div key={i}><span>{l}</span><strong>{v}</strong></div>)}</div>
       <p className="mu center">{t.sum(r.total)}</p></div>
+    <div className="card pair"><h2>{t.pairH(n,m,b)}</h2><p>{t.pairT(n,m,b)}</p></div> */}
+        <div className="card"><h2>{t.yn}</h2><div className="nums">
+      {[[t.nn,n],[t.mu,m],[t.bh,b]].map(([l,v],i)=><div key={i}><span>{l}</span><strong>{v}</strong></div>)}</div>
+      <p className="mu center">{t.sum(r.total)}</p></div>
     <div className="card pair"><h2>{t.pairH(n,m,b)}</h2><p>{t.pairT(n,m,b)}</p></div>
+    {!aligned&&<div className="card dosh"><h2>{t.dnH}</h2><p>{t.dnT(cnt)}</p>
+      {cnt>0&&<div className="blur" aria-hidden="true"><i/><i/><i/><span>{t.dnLock}</span></div>}
+      <button className="btn big" disabled={busy} onClick={buy}>{busy?t.payBusy:cta}</button>
+      {perr&&<p className="err" role="alert">{t.payErr}</p>}<p className="mu small">{t.dnNote}</p></div>}
     <div className="card why"><h2>{t.whyH}</h2><p>{t.whyT}</p></div>
   </div></section>
   <section><div className="w"><h2 className="center">{t.lockH}</h2><p className="mu center">{t.lockS}</p>
