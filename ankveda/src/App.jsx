@@ -295,7 +295,7 @@ function Navbar({h,lang,setLang,go}){
     <button className="brand" onClick={()=>pick('home')} aria-label="AnkVeda"><Logo/></button>
     <nav className={'nav'+(open?' open':'')} aria-label="Main">
       {items.map(([k,n])=><button key={k} onClick={()=>pick(k)}>{n}</button>)}
-      <button className="navcta" onClick={()=>pick('report')}>{h.nav.report}</button>
+      
     </nav>
     <div className="barr"><LangSwitch lang={lang} setLang={setLang}/>
       <button className="burger" aria-expanded={open} aria-label={h.nav.menu} onClick={()=>setOpen(!open)}><span/><span/><span/></button></div>

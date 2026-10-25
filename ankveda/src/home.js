@@ -42,6 +42,6 @@ en:{
  faqH:'Common questions about the free check',
  faq:[['Is it really free?','Yes. The name check is completely free. No card or payment. The full report is optional and paid.'],['Is this real or just a gimmick?','Numerology is a tradition-based belief, not a scientific theory. We simply apply one fixed method and show it openly.'],['Do I have to legally change my name?','No. This check does not ask you to change anything. Any change is entirely your decision.'],['How accurate is the free check?','The arithmetic is exact. Interpreting numerology is a matter of belief, not established fact.'],['What do you do with my WhatsApp number?','It is optional. If given, it is used to send your result, nothing else. (Write your real policy here before launch.)']],
  endH:'You may never have looked at what your name says.',endT:'It takes just 10 seconds.',endCta:'Check my name, free →',endS:'No payment. No card. Instant result.',
- nav:{home:'Home',how:'How it works',faq:'FAQ',report:'Name report ₹99',contact:'Contact',menu:'Menu'},
+ nav:{home:'Home',how:'How it works',faq:'FAQ',contact:'Contact',menu:'Menu'},
  links:{privacy:'Privacy',terms:'Terms',contact:'Contact'},
  pg:{privacy:'Privacy Policy',terms:'Terms of Use',contact:'Contact'},ph:'Write your final text here. (sample placeholder)',back:'← Back'}};
