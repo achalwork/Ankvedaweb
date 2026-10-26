@@ -318,6 +318,7 @@ export default function App(){
       if(k==='report'){window.scrollTo({top:0,behavior:'smooth'});return setTimeout(()=>document.querySelector('.form input')?.focus(),400)}
       document.getElementById(k)?.scrollIntoView({behavior:'smooth'})},120)};
   const submit=f=>{const r=analyze(f);setStage('loading');setTimeout(()=>{setRes({...r,name:f.name,form:f});setStage('result')},2400)};
+  const downloadPdf=async()=>{if(!res?.form)return;const fname=`AnkVeda-Report-${(res.form.name||'name').replace(/\W+/g,'_')}.pdf`;try{await saveBlob(await makePdfBlob(res.form,lang),fname)}catch(e){console.error(e)}};
   // returning buyer who closed the tab after paying
   useEffect(()=>{let id;try{id=localStorage.getItem('av-order')}catch{}if(!id)return;
     fetch('/api/status/'+id).then(r=>r.json()).then(j=>{if(j.paid){let f=null;try{f=JSON.parse(localStorage.getItem('av-form')||'null')}catch{}
@@ -346,7 +347,7 @@ export default function App(){
       {!page&&stage==='form'&&<Landing t={t} h={H[lang]} onSubmit={submit}/>}
       {!page&&stage==='loading'&&<Loading t={t}/>}
       {!page&&stage==='pay'&&order&&<PayPage p={PT[lang]} order={order} form={res?.form} onPaid={paidNow} back={()=>setStage('result')} checkout={checkout}/>}
-      {!page&&stage==='result'&&<Result t={t} r={res} buy={buy} busy={busy} perr={perr} again={()=>setStage('form')}/>}
+      {!page&&stage==='result'&&<Result t={t} r={res} buy={buy} busy={busy} perr={perr} again={()=>setStage('form')} onDownload={downloadPdf}/>}
       {!page&&stage==='verifying'&&<section><div className="w narrow"><div className="card load"><div className="spin"/><p>{t.pwait}</p></div></div></section>}
       {!page&&stage==='paid'&&<Paid t={t} token={token} lang={lang} form={res?.form}/>}
     </main>
@@ -414,7 +415,7 @@ function Loading({t}){const [i,setI]=useState(0);
   useEffect(()=>{const id=setInterval(()=>setI(x=>Math.min(x+1,t.load.length-1)),800);return()=>clearInterval(id)},[t]);
   return <section><div className="w narrow"><div className="card load"><div className="spin"/><p aria-live="polite">{t.load[i]}</p></div></div></section>}
 
-function Result({t,r,buy,busy,perr,again}){
+function Result({t,r,buy,busy,perr,again,onDownload}){
   const {number:n,mulank:m,bhagyank:b,personalYear:p,aligned}=r;const tr=t.trait;
   const cnt=aligned?0:suggest(r.name,m,b,5).length;const cta=!aligned&&cnt>0?t.dnCta:t.cta;
   const area=(a,i)=>{const intro=typeof a[1]==='function'?a[1](n,b,m,p):a[1];const k=i===0?n:i===1?b:i===2?m:i===3?p:null;
@@ -434,6 +435,7 @@ function Result({t,r,buy,busy,perr,again}){
       {[[t.nn,n],[t.mu,m],[t.bh,b]].map(([l,v],i)=><div key={i}><span>{l}</span><strong>{v}</strong></div>)}</div>
       <p className="mu center">{t.sum(r.total)}</p></div>
     <div className="card pair"><h2>{t.pairH(n,m,b)}</h2><p>{t.pairT(n,m,b)}</p></div>
+    <div className="card"><button className="btn big" onClick={onDownload}>⬇ PDF Download करा</button></div>
     {!aligned&&<div className="card dosh"><h2>{t.dnH}</h2><p>{t.dnT(cnt)}</p>
       {cnt>0&&<div className="blur" aria-hidden="true"><i/><i/><i/><span>{t.dnLock}</span></div>}
       <button className="btn big" disabled={busy} onClick={buy}>{busy?t.payBusy:cta}</button>
@@ -523,16 +525,16 @@ function Paid({t,token,lang,form}){
   const href=`/api/report/${token}?lang=${lang}`;const demo=token==='demo';
   const [st,setSt]=useState(demo?'idle':'auto'); // idle | busy | auto | err
   const fname=`AnkVeda-Report-${(form?.name||'name').replace(/\W+/g,'_')}.pdf`;
-  // Server PDF (old backend format, no kundali). Only used as a last resort.
+  // Fallback: build PDF in browser only if server fails
+  const local=async()=>{if(!form){setSt('err');return}setSt('busy');
+    try{await saveBlob(await makePdfBlob(form,lang),fname);setSt('idle')}
+    catch(e){console.error(e);setSt('err')}};
+  // Main path: server validates token and returns PDF
   const server=async()=>{setSt('busy');
     try{const r=await fetch(href);if(!r.ok||!(r.headers.get('content-type')||'').includes('pdf'))throw new Error('x');await saveBlob(await r.blob(),fname);setSt('idle')}
-    catch{setSt('err')}};
-  // Main path: build the full report (with kundali) in the browser. No server call, so no 500 error in the console.
-  const local=async()=>{if(!form)return server();setSt('busy');
-    try{await saveBlob(await makePdfBlob(form,lang),fname);setSt('idle')}
-    catch(e){console.error(e);server()}};
-  useEffect(()=>{if(!demo)local()},[token]);
-  const click=()=>local();
+    catch{if(form)return local();setSt('err')}};
+  useEffect(()=>{if(!demo)server()},[token]);
+  const click=()=>demo?local():server();
   return <section><div className="w narrow"><div className="card paid"><div className="big-star">✦</div><h1>{t.paidH}</h1><p>{t.paidT}</p>
     <button className="btn gold big" disabled={st==='busy'} onClick={click}>{st==='busy'?t.pdfBusy:t.dl}</button>
     {st==='err'&&<p className="err" role="alert">{t.pdfErr}</p>}<p className="mu small">{t.dlN}</p></div></div></section>}
